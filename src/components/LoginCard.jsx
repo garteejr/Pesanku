@@ -1,144 +1,52 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useGoogleLogin } from "@react-oauth/google";
-import { loginUser, googleLogin, getCurrentUser } from "../service";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import petir from "../assets/icon.svg";
 
 function LoginCard() {
 
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  
-  const handleGetStarted = async () => {
-
-    if (!email || !password) {
-      alert("Email dan password wajib diisi");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-
-      console.log("========== DEBUG LOGIN ==========");
-      console.log("Email raw:", email);
-      console.log("Password raw:", password);
-
-      const cleanEmail = email.trim().toLowerCase();
-      const cleanPassword = password.trim();
-
-      console.log("Email dikirim:", cleanEmail);
-      console.log("Password dikirim:", cleanPassword);
-      console.log("=================================");
-
-      await loginUser(cleanEmail, cleanPassword);
-
-      const user = await getCurrentUser();
-
-      console.log("User:", user);
-
-      alert("Login berhasil!");
-      window.location.href = "/dashboard";
-
-    } catch (error) {
-      console.error("Login error:", error);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-
-      setLoading(true);
-
-      try {
-
-        console.log("Google token:", tokenResponse.access_token);
-
-        await googleLogin(tokenResponse.access_token);
-
-        const user = await getCurrentUser();
-
-        console.log("User:", user);
-
-        alert("Login Google berhasil");
-        window.location.href = "/dashboard";
-
-      } catch (error) {
-        console.error("Google login error:", error);
-        alert(error.message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => {
-      alert("Google login gagal");
-    }
-  });
-
-
-  const handleFacebookLogin = async () => {
-    alert("Facebook login belum tersedia");
-  };
+  const { loading, handleLogin, googleAuth, facebookAuth } = useAuth();
 
   return (
     <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 w-[350px] shadow-xl">
 
-      
       <div className="flex justify-center mb-4">
         <img src={petir} alt="petir" className="w-12 h-12" />
       </div>
 
-      
-      <h1 className="text-2xl font-bold text-center">
-        Selamat Datang
-      </h1>
-
+      <h1 className="text-2xl font-bold text-center">Selamat Datang</h1>
       <p className="text-center text-gray-400 text-sm mb-5">
         Buat pesan untuk menghubungi Teman-teman Anda. Gratis
       </p>
 
       <div className="space-y-4">
 
-        
         <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2">
           <Mail className="text-gray-500" size={18} />
-
           <input
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => {
-              const value = e.target.value;
-              console.log("typing email:", value);
-              setEmail(value);
-            }}
+            onChange={(e) => setEmail(e.target.value)}
             className="bg-transparent outline-none ml-2 w-full"
           />
         </div>
 
-        
         <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2">
           <Lock className="text-gray-500" size={18} />
-
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
-            onChange={(e) => {
-              const value = e.target.value;
-              console.log("typing password:", value);
-              setPassword(value);
-            }}
+            onChange={(e) => setPassword(e.target.value)}
             className="bg-transparent outline-none ml-2 w-full"
           />
-
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -151,30 +59,28 @@ function LoginCard() {
           </button>
         </div>
 
-        
-        <div className="text-right text-sm text-gray-500 cursor-pointer hover:text-black">
+        {/* FORGOT */}
+        <div
+          onClick={() => navigate("/forgot-password")}
+          className="text-right text-sm text-gray-500 cursor-pointer hover:text-black"
+        >
           Lupa Sandi?
         </div>
 
-       
         <button
-          onClick={handleGetStarted}
+          onClick={() => handleLogin(email, password)}
           disabled={loading}
           className="w-full bg-black text-white hover:bg-gray-900 transition-all shadow-sm py-2 rounded-lg font-semibold disabled:opacity-50"
         >
           {loading ? "Loading..." : "Mulai"}
         </button>
 
-        <p className="text-center text-gray-400 text-sm">
-          Atau masuk dengan
-        </p>
+        <p className="text-center text-gray-400 text-sm">Atau masuk dengan</p>
 
-       
         <div className="flex gap-4 justify-center">
 
-          
           <button
-            onClick={() => handleGoogleLogin()}
+            onClick={googleAuth}
             className="flex items-center justify-center bg-white border border-gray-200 py-3 px-13 rounded-lg hover:bg-gray-50 transition-all shadow-sm"
           >
             <svg viewBox="0 0 48 48" className="w-6 h-6">
@@ -185,9 +91,8 @@ function LoginCard() {
             </svg>
           </button>
 
-          
           <button
-            onClick={handleFacebookLogin}
+            onClick={facebookAuth}
             className="flex items-center justify-center bg-white border border-gray-200 py-3 px-13 rounded-lg hover:bg-gray-50 transition-all shadow-sm"
           >
             <svg viewBox="0 0 48 48" className="w-6 h-6">
