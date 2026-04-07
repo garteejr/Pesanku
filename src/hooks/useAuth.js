@@ -1,90 +1,58 @@
 import { useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
-import { loginUser, googleLogin, getCurrentUser } from "../service";
+import { useNavigate } from "react-router-dom";
+import { googleLogin, loginUser } from "../service";
+import toast from "react-hot-toast";
 
 export const useAuth = () => {
-
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // ================= LOGIN EMAIL =================
   const handleLogin = async (email, password) => {
-
     if (!email || !password) {
-      alert("Email dan password wajib diisi");
+      toast.error("Email dan password wajib diisi");
       return;
     }
-
     setLoading(true);
-
+    const toastId = toast.loading("Sedang masuk...");
     try {
-
-      console.log("========== DEBUG LOGIN ==========");
-      console.log("Email raw:", email);
-      console.log("Password raw:", password);
-
-      const cleanEmail = email.trim().toLowerCase();
-      const cleanPassword = password.trim();
-
-      console.log("Email dikirim:", cleanEmail);
-      console.log("Password dikirim:", cleanPassword);
-      console.log("=================================");
-
-      await loginUser(cleanEmail, cleanPassword);
-
-      const user = await getCurrentUser();
-
-      console.log("User:", user);
-
-      alert("Login berhasil!");
-      window.location.href = "/dashboard";
-
+      await loginUser(email.trim().toLowerCase(), password.trim());
+      toast.success("Login berhasil!", { id: toastId });
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
-      alert(error.message);
+      toast.error(error.message || "Login gagal", { id: toastId });
     } finally {
       setLoading(false);
     }
   };
 
   // ================= GOOGLE LOGIN =================
-  const googleAuth = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-
-      setLoading(true);
-
-      try {
-
-        console.log("Google token:", tokenResponse.access_token);
-
-        await googleLogin(tokenResponse.access_token);
-
-        const user = await getCurrentUser();
-
-        console.log("User:", user);
-
-        alert("Login Google berhasil");
-        window.location.href = "/dashboard";
-
-      } catch (error) {
-        console.error("Google login error:", error);
-        alert(error.message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => {
-      alert("Google login gagal");
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    const toastId = toast.loading("Masuk dengan Google...");
+    try {
+      const idToken = credentialResponse.credential; // ✅ ini id_token nya
+      console.log("ID TOKEN:", idToken);
+      await googleLogin(idToken);
+      toast.success("Login Google berhasil!", { id: toastId });
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error(error.message || "Login Google gagal", { id: toastId });
+    } finally {
+      setLoading(false);
     }
-  });
+  };
 
-  const facebookAuth = () => {
-    alert("Facebook login belum tersedia");
+  const handleGoogleError = () => {
+    toast.error("Login Google gagal, coba lagi.");
   };
 
   return {
     loading,
     handleLogin,
-    googleAuth,
-    facebookAuth
+    handleGoogleSuccess,
+    handleGoogleError,
   };
 };

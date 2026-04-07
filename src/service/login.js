@@ -2,29 +2,49 @@ import { BASE_URL } from "./base";
 
 export const loginUser = async (email, password) => {
 
-  const response = await fetch(`${BASE_URL}/api/v1/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      email: email.trim(),
-      password: password.trim(),
-    }),
-  });
-
-  let data;
+  if (!email || !password) {
+    throw new Error("Email dan password wajib diisi");
+  }
 
   try {
-    data = await response.json();
-  } catch {
-    data = { message: "Invalid server response" };
-  }
 
-  if (!response.ok) {
-    throw new Error(data.message || "Login gagal");
-  }
+    const response = await fetch(
+      `${BASE_URL}/api/v1/auth/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // penting untuk cookie
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password: password.trim(),
+        }),
+      }
+    );
 
-  return data;
+    let data;
+
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("Server tidak merespon JSON");
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "Login gagal");
+    }
+
+    return data;
+
+  } catch (error) {
+
+    console.error("Login error:", error);
+
+    if (error.message === "Failed to fetch") {
+      throw new Error("Tidak bisa konek ke server");
+    }
+
+    throw error;
+  }
 };

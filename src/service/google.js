@@ -10,7 +10,7 @@ export const googleLogin = async (idToken) => {
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify({ idToken }),
+    body: JSON.stringify({ id_token: idToken }), // ← ganti idToken jadi id_token
   });
 
   const data = await response.json();
@@ -18,7 +18,7 @@ export const googleLogin = async (idToken) => {
   console.log("GOOGLE RESPONSE:", data);
 
   if (!response.ok) {
-    throw new Error(data.error || "Google login gagal");
+    throw new Error(data.message || "Google login gagal");
   }
 
   return data;

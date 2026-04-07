@@ -1,29 +1,55 @@
 import { BASE_URL } from "./base";
 
+// ================= GET CURRENT USER =================
 export const getCurrentUser = async () => {
 
-  const response = await fetch(`${BASE_URL}/api/v1/auth/me`, {
-    method: "GET",
-    credentials: "include",
-  });
+  try {
 
-  const data = await response.json();
+    const response = await fetch(
+      `${BASE_URL}/api/v1/auth/me`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
 
-  console.log("CURRENT USER:", data);
+    if (!response.ok) {
+      throw new Error("Unauthorized");
+    }
 
-  if (!response.ok) {
-    throw new Error(data.message || "Unauthorized");
+    const data = await response.json();
+
+    console.log("CURRENT USER:", data);
+
+    return data;
+
+  } catch (error) {
+
+    console.error("Get user error:", error);
+
+    throw error;
   }
-
-  return data;
 };
 
+// ================= LOGOUT =================
 export const logoutUser = async () => {
 
-  await fetch(`${BASE_URL}/api/v1/auth/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
+  try {
 
-  window.location.href = "/login";
+    await fetch(
+      `${BASE_URL}/api/v1/auth/logout`,
+      {
+        method: "POST",
+        credentials: "include",
+      }
+    );
+
+    window.location.href = "/login";
+
+  } catch (error) {
+
+    console.error("Logout error:", error);
+
+    window.location.href = "/login";
+  }
 };

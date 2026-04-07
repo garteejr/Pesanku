@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../hooks/useAuth";
 import petir from "../assets/icon.svg";
 
@@ -11,18 +12,18 @@ function LoginCard() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { loading, handleLogin, googleAuth, facebookAuth } = useAuth();
+  const { loading, handleLogin, handleGoogleSuccess, handleGoogleError } = useAuth();
 
   return (
-    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 w-[350px] shadow-xl">
+    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-8 w-[400px] shadow-xl">
 
       <div className="flex justify-center mb-4">
         <img src={petir} alt="petir" className="w-12 h-12" />
       </div>
 
-      <h1 className="text-2xl font-bold text-center">Selamat Datang</h1>
+      <h1 className="text-2xl font-bold text-center">Halo Lagi!</h1>
       <p className="text-center text-gray-400 text-sm mb-5">
-        Buat pesan untuk menghubungi Teman-teman Anda. Gratis
+        Masuk untuk kembali terhubung dengan teman-temanmu.
       </p>
 
       <div className="space-y-4">
@@ -42,7 +43,7 @@ function LoginCard() {
           <Lock className="text-gray-500" size={18} />
           <input
             type={showPassword ? "text" : "password"}
-            placeholder="Password"
+            placeholder="Kata sandi"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="bg-transparent outline-none ml-2 w-full"
@@ -59,7 +60,6 @@ function LoginCard() {
           </button>
         </div>
 
-        {/* FORGOT */}
         <div
           onClick={() => navigate("/forgot-password")}
           className="text-right text-sm text-gray-500 cursor-pointer hover:text-black"
@@ -77,30 +77,17 @@ function LoginCard() {
 
         <p className="text-center text-gray-400 text-sm">Atau masuk dengan</p>
 
-        <div className="flex gap-4 justify-center">
-
-          <button
-            onClick={googleAuth}
-            className="flex items-center justify-center bg-white border border-gray-200 py-3 px-13 rounded-lg hover:bg-gray-50 transition-all shadow-sm"
-          >
-            <svg viewBox="0 0 48 48" className="w-6 h-6">
-              <path fill="#EA4335" d="M24 9.5c3.5 0 6.1 1.5 7.5 2.7l5.5-5.5C33.7 3.4 29.4 1.5 24 1.5 14.7 1.5 6.7 7.3 3.4 15.6l6.8 5.3C12 14.1 17.5 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-2.7-.4-3.9H24v7.3h12.7c-.3 1.8-1.9 4.5-5.4 6.3l8.3 6.4c4.8-4.4 7.6-10.9 7.6-18.1z"/>
-              <path fill="#FBBC05" d="M10.2 28.9c-.5-1.4-.8-2.9-.8-4.4s.3-3 .8-4.4l-6.8-5.3C1.2 18.3 0 21.3 0 24.5s1.2 6.2 3.4 9.7l6.8-5.3z"/>
-              <path fill="#34A853" d="M24 47.5c6.5 0 11.9-2.1 15.9-5.7l-8.3-6.4c-2.2 1.5-5.1 2.5-7.6 2.5-6.5 0-12-4.6-13.9-10.7l-6.8 5.3C6.7 40.7 14.7 47.5 24 47.5z"/>
-            </svg>
-          </button>
-
-          <button
-            onClick={facebookAuth}
-            className="flex items-center justify-center bg-white border border-gray-200 py-3 px-13 rounded-lg hover:bg-gray-50 transition-all shadow-sm"
-          >
-            <svg viewBox="0 0 48 48" className="w-6 h-6">
-              <path fill="#1877F2" d="M48 24C48 10.74 37.26 0 24 0S0 10.74 0 24c0 11.99 8.78 21.93 20.25 23.71V30.94h-6.09V24h6.09v-5.28c0-6.01 3.58-9.33 9.06-9.33 2.63 0 5.38.47 5.38.47v5.91h-3.03c-2.98 0-3.91 1.85-3.91 3.75V24h6.66l-1.06 6.94h-5.6v16.77C39.22 45.93 48 35.99 48 24z"/>
-              <path fill="#fff" d="M33.35 30.94 34.41 24h-6.66v-4.48c0-1.9.93-3.75 3.91-3.75h3.03v-5.91s-2.75-.47-5.38-.47c-5.48 0-9.06 3.32-9.06 9.33V24h-6.09v6.94h6.09v16.77a24.2 24.2 0 0 0 7.5 0V30.94h5.6z"/>
-            </svg>
-          </button>
-
+        {/* GOOGLE LOGIN */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap={false}
+            theme="outline"
+            shape="rectangular"
+            text="signin_with"
+            locale="id"
+          />
         </div>
 
       </div>
